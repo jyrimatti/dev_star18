@@ -1,0 +1,657 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<meta name="description" content="Basics of various recursion schemes">
+		<meta name="author" content="Jyri-Matti 'Jüppe' Lähteenmäki">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<title>Curse explicit recursion!</title>
+
+		<style>
+			.reveal .footer {
+			  color: gray;
+			  position: absolute;
+			  top: 1em;
+			  right: 1em;
+			  font-size: 0.4em;
+			}
+		</style>
+		
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/serif.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h2>Curse explicit recursion!</h2>
+
+					<p>dev* 2018</p>
+					<p><a href="https://twitter.com/jyrimatti">@jyrimatti</a></p>
+				</section>
+
+				<section>
+					<h3>What is recursion?</h3>
+					<div class="fragment">
+						<img src="google.png" />
+						<p>Yeah, old joke...</p>
+					</div>
+				</section>
+
+				<section>
+					<h3>What is recursion?</h3>
+					<table>
+						<tr>
+							<td><q>
+								Recursion in computer science is a method of solving a problem
+								where the solution depends on solutions to smaller instances of the
+								same problem (as opposed to iteration). The approach can be
+								applied to many types of problems, and recursion is <b>one of the
+								central ideas</b> of computer science.
+							</q></td>
+							<td>🤔</td>
+						</tr>
+					</table>
+					<p style="text-align: right"><small><cite><a href="https://en.wikipedia.org/wiki/Recursion_(computer_science)">https://en.wikipedia.org/wiki/Recursion_(computer_science)</a></a></cite></small></p>
+				</section>
+
+				<section>
+					<h3>Factorial with iteration, in Java</h3>
+					<pre><code class="java">int factorial(int n) {
+    int res = 1;
+    for (int i=1; i<=n; i++) {
+        res = res * i;
+    }
+    return res;
+}
+</code></pre>
+					<p>With mutation included, as iteration often does.</p>
+				</section>
+
+				<section>
+					<img src="mkay.jpg" />
+				</section>
+
+				<section>
+					<p>Standard response of functional languages: recursion!</p>
+					<pre><code class="haskell">
+factorial 0 = 1
+factorial n = n * factorial (n-1)
+					</code></pre>
+					<p>Maybe elegant but there's a problem...</p>
+					<p class="fragment">It's not <i>tail recursive</i> -> will blow up stack usage</p>
+				</section>
+
+				<section>
+					<h3>Recursive list length</h3>
+					<pre><code class="scheme">
+(define (length lst)
+    (cond
+        [(empty? lst) 0]
+        [else (+ 1 (length lst))]))
+					</code></pre>
+					<p>But there’s a bug not easily seen!</p>
+					<p class="fragment">This is in Scheme, so is this a...</p>
+					<p class="fragment"> •_•)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
+							( •_•)>⌐■-■<br/>
+							(⌐■_■)&nbsp;&nbsp;&nbsp;&nbsp;</p>
+					<p class="fragment">... Recursion Scheme?</p>
+				</section>
+
+				<section>
+					<p>Recursion is dangerous!</p>
+					<p>Do we really need recursion?</p>
+					<pre><code class="haskell">
+factorial n = foldr (*) 1 [1..n]
+					</code></pre>
+					<p>No recursion to be seen! But what is this “fold” thing?</p>
+					<ul>
+						<li>Fold hides the recursion in a safe wrapping</li>
+						<li>Fold is actually something called a <i>catamorphism</i></li>
+						<li>There are other wrappers. Ever heard of an <i>unfold</i>?</li>
+					</ul>
+					<p style="text-align: left"><small><cite>more Haskell factorials: <a href="https://www.willamette.edu/~fruehr/haskell/evolution.html">https://www.willamette.edu/~fruehr/haskell/evolution.html</a></cite></small></p>
+				</section>
+
+				<section>
+					<p>Can we “package” all kinds of recursion?
+					<p>Could we even have a usable programming language without any kind of explicit recursive calls?
+					<p class="fragment">I have no idea 🙂</p>
+				</section>
+				
+				<section>
+					<h3>But why?</h3>
+					<ul>
+						<li class="fragment">separatation of concerns</li>
+						<li class="fragment">separate actual algorithm from the recursive part</li>
+						<ul class="fragment"><li>e.g. for <i>length</i> the "business logic” is:<br/><code>1 + length_of_rest_of_the_list</code></li></ul>
+						<li class="fragment">cleaner!</li>
+						<li class="fragment">generally usable with different structures (trees?)</li>
+					</ul>
+				</section>
+
+				<section>
+					<h3>Recursion Schemes</h3>
+					<p>Brief and incomplete history</p>
+					<ul><small>
+						<li class="fragment">1987: Name <i>catamorphism</i> appears in a <a href="https://www.researchgate.net/publication/238688759_First_steps_towards_the_theory_of_rose_trees">paper</a> by <i>Lambert Meertens</i></li>
+						<li class="fragment">1990: The category theoretic machinery behind these was <a href="https://www.sciencedirect.com/science/article/pii/0167642390900237">resolved</a> by <i>Grant Malcolm</i></li>
+						<li class="fragment">1991: <i>Meijer</i>, <i>Fokkinga</i> and <i>Paterson</i> publish their famous paper<br /> <a href="http://maartenfokkinga.github.io/utwente/mmf91m.pdf">Functional Programming with Bananas, Lenses, Envelopes and Barbed Wire</a></li>
+						<li class="fragment">...</li>
+						<li class="fragment">2011: <i>Edward Kmett</i> releases the first version of <a href="http://hackage.haskell.org/package/recursion-schemes">recursion-schemes library</a></li>
+						<li class="fragment">2012: Hinze et al. publish a <a href="http://www.cs.ox.ac.uk/people/daniel.james/sorting/sorting.pdf">paper</a> and <a href="http://www.cs.ox.ac.uk/ralf.hinze/publications/Sorting.pdf">another</a> describing sorting algorithms in recursion schemes </li>
+						<li class="fragment">2014: First part of the excellent <a href="https://blog.sumtypeofway.com/an-introduction-to-recursion-schemes/">blog series</a> is published</li>
+						<li class="fragment">2018: Lot's of blog and conference activity!</li>
+					</small></ul>
+				</section>
+
+				<section>
+					<h3>Is this still pop?</h3>
+					<img src="trends-rs.png" />
+				</section>
+
+				<section>
+					<h3>Is this still pop?</h3>
+					<img src="trends-cata.png" />
+				</section>
+
+				<section>
+					<h3>Implementing some use cases</h3>
+					<p>For these examples we need something called<br /> <i>a fix point</i></p>
+					<pre><code class="haskell">newtype Fix f = Fix (f (Fix f))
+
+-- Wrap value inside a Fix point
+fix :: f (Fix f) -> Fix f
+fix = Fix
+
+-- Unwrap value from a Fix point
+unfix :: Fix f -> f (Fix f)
+unfix (Fix f) = f
+</code></pre>
+					<p class="fragment">Learning about it is left as an exercise for the reader 😉</p>
+				</section>
+
+				<section>
+					<h4>Example 1: sum of a list of numbers (catamorphism)</h4>
+					<pre><code style="max-height: 500px" class="haskell">-- Familiar cons-list. No need to make this, but as an example...
+data MyListF elem rest = NilF | ConsF elem rest deriving Functor
+type List t = Fix (MyListF t)
+
+nil = Fix NilF -- make an empty list
+cons x xs = Fix (ConsF x xs) -- cons a value in front of a list
+
+-- our "algorithm" to sum list elements would be just:
+sumAlg = \case
+    NilF       -> 0      -- sum of an empty list is 0
+    ConsF x xs -> x + xs -- add the current value to others
+
+-- execute our algorithm by giving it to some library function
+exampleSum = doStuff sumAlg
+-- > exampleSum (cons 4 $ cons 12 $ cons 7 nil) -- [4, 12, 7]
+-- 23</code></pre>
+				</section>
+				<section>
+					<h4>Example 1: sum of a list of numbers (catamorphism)</h4>
+					<pre><code class="haskell">-- This general library function still needs explicit recursion
+doStuff alg = unfix >>>          -- unwrap from the Fix point
+              fmap (doStuff alg) -- apply algorithm recursively
+              >>> alg            -- apply to the final value
+
+-- "alg" was not an abreviation of "algorithm", but of "Algebra"
+type Algebra f a = f a -> a
+
+-- Complete implementation for 'sum' would thus be the
+-- following (using recursion-schemes library), which neatly
+-- contains only the algorithmic part without any recursion
+sum :: [Int] -> Int
+sum = cata $ \case
+    Nil       -> 0
+    Cons x xs -> x + xs</code></pre>
+				<p class="fragment">Sum is just a regular fold, so the famous <i>fold</i> is just one of the recursion schemes, namely <i>catamorphism</i>!</p>
+				</section>
+
+				<section>
+					<h4>Reminder: Many things come in pairs</h4>
+					<img style="height: 12em" src="coffee.jpg" />
+				</section>
+
+				<section>
+					<h4>Example 2: natural numbers (anamorphism)</h4>
+					<pre><code class="haskell">-- Stream of natural numbers
+data StreamF r = StreamF Natural r deriving Functor
+type NatStream = Fix StreamF
+
+-- our "algorithm" to create numbers would be
+naturalsCoalg n = StreamF n (n + 1) -- for each n, next is n+1
+
+-- same as before, seed value zero
+exampleNats = doStuff naturalsCoalg 0
+
+-- unfortunately in this example our numbers are our NatStream,
+-- but we can convert it to a Haskell list with a catamorphism
+exampleNaturals = cata (\case StreamF x xs -> x:xs) exampleNats
+-- > take 4 exampleNaturals
+-- [0,1,2,3]</code></pre>
+				</section>
+				<section>
+					<h4>Example 2: natural numbers (anamorphism)</h4>
+					<pre><code class="haskell">-- Dual of catamorphism:
+-- 1) arrows are reversed
+-- 2) wrap instead of unwrap
+doStuff coalg = Fix <<< fmap (doStuff coalg) <<< coalg
+
+-- "coalg" is called a "Coalgebra"
+type Coalgebra f a = a -> f a
+
+-- Complete implementation using recursion-schemes library:
+naturals :: [Natural]
+naturals = ana (\n -> Cons n (n + 1)) 0
+					</code></pre>
+					<p class="fragment">So, generating an infinite stream is just one of the recursion schemes, namely <i>anamorphism</i>!</p>
+				</section>
+
+				<section>
+					<h3>Sidetrack: <i>fan out</i> operator</h3>
+					<p>in <code>Data.Tuple.Extra</code><br />or <code>Control.Arrow</code><br />or <code>Control.Category.Cartesian</code></p>
+					<pre><code class="haskell">
+-- for functions:
+(&&&) :: (a -> b) -> (a -> c) -> a -> (b, c)
+-- for any category:
+(&&&) :: a b c -> a b c' -> a b (c, c')
+					</code></pre>
+					<p>"split a value to two different paths”</p>
+				</section>
+
+				<section>
+					<h4>Example 3: factorial (paramorphism)</h4>
+					<pre><code class="haskell" style="max-height: 500px">-- Natural numbers as Peano
+data NatF r = ZeroF | SuccF r deriving Functor
+type Nat = Fix NatF
+
+zero = Fix ZeroF
+succ = Fix . SuccF
+
+factorialAlg = \case
+    ZeroF          -> 1
+    SuccF (cur, r) -> (toNat cur + 1) * r
+    -- unfortunately our example numbers are Peano, but we
+    -- can use catamorphism to transform to regular numbers
+  where toNat = cata $ \case
+        ZeroF   -> 0
+        SuccF n -> n + 1
+
+exampleFactorial = doStuff factorialAlg
+-- > exampleFactorial (succ (succ (succ zero))) -- 3
+-- 6</code></pre>
+				</section>
+				<section>
+					<h4>Example 3: factorial (paramorphism)</h4>
+					<pre><code class="haskell">
+doStuff alg = unfix >>> fmap (id &&& doStuff alg) >>> alg
+
+-- here "alg" is called an "RAlgebra"
+type RAlgebra f a = f (Fix f, a) -> a
+
+-- Complete implementation using recursion-schemes library:
+factorial :: Natural -> Natural
+factorial = para $ \case
+    Nothing     -> 1
+    Just (n, r) -> (n+1) * rx
+					</code></pre>
+					<p class="fragment">Thus, catamorphism with access to the current input value is called a <i>paramorphism</i>!</p>
+				</section>
+
+				<section>
+					<h3>Sidetrack: <i>fan in</i> operator</h3>
+					<p>dual for <i>fan out</i></p>
+					<p>in <code>Control.Arrow</code><br />or <code>Control.Category.Cartesian</code></p>
+					<pre><code class="haskell">
+(|||) :: a b d -> a c d -> a (Either b c) d 
+					</code></pre>
+					<p>“split a valut to one of two different paths”</p>
+				</section>
+
+				<section>
+					<h4>Example 4: numeric range (apomorphism)</h4>
+					<pre><code class="haskell">rangeCoalg to = \case
+    n | n == to -> ConsF n (Left nil)
+    n           -> ConsF n (Right (n + 1))
+
+exampleRange_ from to = doStuff (rangeCoalg to) from
+-- have to convert our List type to the Haskell list again...
+exampleRange from to = cata (\case
+    NilF       -> []
+    ConsF x xs -> x:xs
+) (exampleRange_ from to)
+-- > exampleRange 0 4
+-- [0,1,2,3,4]</code></pre>
+				</section>
+				<section>
+					<h4>Example 4: numeric range (apomorphism)</h4>
+					<pre><code class="haskell">doStuff coalg = Fix <<< fmap (id ||| doStuff coalg) <<< coalg
+
+-- here "coalg" is called an "RCoalgebra":
+type RCoalgebra f a = a -> f (Either (Fix f) a)
+
+-- Complete implementation using recursion-schemes library:
+range :: Int -> Int -> [Int]
+range from to = flip apo from $ \case
+    n | n == to -> Cons n (Left [])
+    n           -> Cons n (Right (n + 1))</code></pre>
+					<p class="fragment">That is: anamorphism terminating at some chosen point, is called an <i>apomorphism</i>!</p>
+				</section>
+
+				<section>
+					<h3>Sidetrack: Freedom!</h3>
+					<p>Free Monad:</p>
+					<pre><code class="haskell">
+data Free f a = Pure a | Free (f (Free f a))
+					</code></pre>
+					<p>Cofree Comonad:</p>
+					<pre><code class="haskell">
+data Cofree f a = a :< (f (Cofree f a))
+					</code></pre>
+					<p>Kind of minimal way to provide monadic or comonadic structure</p>
+				</section>
+
+				<section>
+					<h4>Example 5: fibonacci (histomorphism)</h4>
+					<p>Sometimes we need access to the previous values</p>
+					<pre><code class="haskell">
+-- using Cofree Comonad here to bring comonadic structure...
+fibonacciAlg ZeroF                         = 0
+fibonacciAlg (SuccF (_ :< ZeroF))          = 1
+fibonacciAlg (SuccF (a :< SuccF (b :< _))) = a + b
+
+exampleFibonacci = doStuff fibonacciAlg
+-- > exampleFibonacci (succ (succ (succ zero))) -- 3
+-- 2
+					</code></pre>
+				</section>
+				<section>
+					<h4>Example 5: fibonacci (histomorphism)</h4>
+					<pre><code class="haskell">
+doStuff alg = f >>> (\(x :< _) -> x)
+    where f = unfix >>> fmap f >>> (alg &&& id) >>> uncurry (:<)
+
+-- here "alg" is called a "CVAlgebra"
+type CVAlgebra f a = f (Cofree f a) -> a
+
+-- Complete implementation using recursion-schemes library:
+fibonacci :: Natural -> Natural
+fibonacci = histo $ \case
+    Nothing                   -> 0
+    Just (_ :< Nothing)       -> 1
+    Just (a :< Just (b :< _)) -> a + b
+					</code></pre>
+					<p class="fragment">Paramorphism providing the whole history instead of the current value is called a <i>histomorphism</i>!</p>
+				</section>
+
+				<section>
+					<h4>Example 6: capitalizeWords (futumorphism)</h4>
+					<p>Apomorphism let us terminate once, but now we need to terminate multiple times with a value (word)</p>
+					<pre><code class="haskell">capitalizeWordsCoalg ""     = NilF
+capitalizeWordsCoalg str = let 
+    ws = words str
+    (first,rest) = (head ws, tail ws)
+    capitalized = toUpper (head first) : tail first
+  in ConsF capitalized (Pure $ unwords rest)
+
+exampleCapitalizeWords_ = doStuff capitalizeWordsCoalg
+exampleCapitalizeWords str = unwords $ cata (\case
+    NilF       -> []
+    ConsF x xs -> x:xs
+  ) (exampleCapitalizeWords_ str)
+-- > exampleCapitalizeWords "foo bar"
+-- "Foo Bar"</code></pre>
+				</section>
+				<section>
+					<h4>Example 6: capitalizeWords (futumorphism)</h4>
+					<pre><code class="haskell">doStuff coalg = Fix <<< fmap worker <<< coalg
+where worker (Pure a) = doStuff coalg a
+      worker (Free a) = Fix (fmap worker a)
+
+-- here "coalg" is called a "CVCoalgebra":
+type CVCoalgebra f a = a -> f (Free f a)
+
+-- Complete implementation using recursion-schemes library:
+capitalizeWords :: String -> String
+capitalizeWords = unwords . futu (\case
+    ""  -> Nil
+    str -> let ws = words str
+               (first,rest) = (head ws, tail ws)
+               capitalized = toUpper (head first) : tail first
+           in Cons capitalized (Pure $ unwords rest))</code></pre>
+					<p class="fragment">Whereas histomorphism extended paramorphism to the whole history, <i>futumorphism</i> extends apomorphism to the whole future!</p>
+				</section>
+
+				<section>
+					<h4>Example 7: takeWhile (prepromorphism)</h4>
+					<pre><code class="haskell">-- filtering of a List-functor with a predicate function
+filter _ Nil = Nil
+filter pred x@(Cons h _)
+    | pred h    = x
+    | otherwise = Nil
+
+takeWhile :: (a -> Bool) -> [a] -> [a]
+takeWhile pred = prepro (filter pred) $ \case
+    Nil         -> []
+    (Cons x xs) -> x:xs
+					</code></pre>
+					<p class="fragment"><i>Prepromorphism</i> is like a catamorphism but executes a natural transformation <i>before</i> the actual stuff</p>
+				</section>
+
+				<section>
+					<h4>Example 8: first 10 natural numbers (postpromorphism)</h4>
+					<p>With Apomorphism we could terminate the recursion, but it would be nicer if we could work on infinite streams and cap them with an external function.</p>
+					<pre><code class="haskell">
+-- use whatever generator function
+generate f n = Cons n (f n)
+
+-- now both filtering and stream generation are nicely separated from recursion
+range :: (Num a, Ord a) => a -> a -> [a]
+range from to = postpro (filter (<= to)) (generate (+1)) from
+					</code></pre>
+					<p class="fragment"><i>Postpromorphism</i> is like an anamorphism but executes a natural transformation <i>after</i> the actual stuff</p>
+				</section>
+
+				<section>
+					<h3>hylomorphism</h3>
+					<p>Many times a problem involves multiple recursions.</p>
+					<p>For example: Merge sort</p>
+					<ol>
+						<li>unfold with anamorphism</li>
+						<li>fold with catamorphism</li>
+					</ol>
+					<p>using ana + cata is called a <i>hylomorphism</i></p>
+				</section>
+
+				<section>
+					<h3>hylomorphism</h3>
+					<pre><code class="haskell">
+hylo :: Functor f => Algebra f b -> Coalgebra f a -> a -> b  
+hylo alg coalg = ana coalg >>> cata alg
+					</code></pre>
+					<p>Can be implemented without actually invoking cata or ana.</p>
+					<p>Also it seems that the compiler can optimize away all our imaginary structure used to define Algebra and Coalgebra! *</p>
+					<p style="text-align: right"><small>* <a href="http://fho.f12n.de/posts/2014-05-07-dont-fear-the-cat.html">	http://fho.f12n.de/posts/2014-05-07-dont-fear-the-cat.html</a></small></p>
+				</section>
+
+				<section>
+					<h3>chronomorphism</h3>
+					<p>One can also combine Futumorphism + Histomorphism:</p>
+					<pre><code class="haskell">
+chrono :: Functor f => CVAlgebra f b -> CVCoalgebra f a -> a -> b  
+chrono cvalg cvcoalg = futu cvcoalg >>> histo cvalg
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Elgot algebras</h3>
+					<p>Sometimes we need to short circuit our hylomorphism during construction</p>
+					<pre><code class="haskell">
+elgot :: Functor f => Algebra f b -> (a -> Either b (f a)) -> a -> b
+					</code></pre>
+					<p>or during destruction</p>
+					<pre><code class="haskell">
+coelgot :: Functor f => ((a, f b) -> b) -> Coalgebra f a -> a -> b  
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Sorting</h3>
+					<p>Sorting algorithms tend to be different combinations of specific recursion patterns.</p>
+					<p>Many (if not all?) sorting algorithms can be defined elegantly with suitable recursion schemes.</p>
+					<table>
+						<tr><td>merge-sort</td><td>hylomorfismi</td></tr>
+						<tr><td>quick-sort</td><td>hylomorfismi</td></tr>
+						<tr><td>insertion-sort</td><td>apomorfismi</td></tr>
+						<tr><td>selection-sort</td><td>paramorphism</td></tr>
+					</table>
+				</section>
+
+				<section>
+					<h3>data vs codata</h3>
+					<table>
+						<tr><td>data</td><td>finite</td></tr>
+						<tr><td>codata</td><td>infinite</td></tr>
+					</table>
+					<small class="fragment">
+						<p>Different algebras deal with data. They provide recursion.</p>
+						<p>Different coalgebras deal with codata. They provide corecursion.</p>
+						<p>Some functions are total for data but not for codata (e.g. length).</p>
+						<p>Some functions are total for codata but not for data (e.g. head).</p>
+					</small>
+				</section>
+
+				<section>
+					<h3>data vs codata</h3>
+					<p>In a total language (not Haskell!) the difference is important, since all functions must always terminate and never fail.</p>
+					<p>
+						If our language separated data and codata,<br />
+						could we have safe recursion for data and safe corecursion for codata?!?
+					</p>
+				</section>
+
+				<section>
+					<h3>Summary</h3>
+					<small>
+						<table>
+							<tr><td>catamorphism</td><td>“romauttaminen”</td><td><code><small>type Algebra f a = f a -> a</small></code></td></tr>
+							<tr><td>anamorphism</td><td>“hajauttaminen”</td><td><code><small>type Coalgebra f a = a -> f a</small></code></td></tr>
+							<tr><td>paramorphism</td><td>“liittäminen”</td><td><code><small>type RAlgebra f a = f (Fix f, a) -> a</small></code></td></tr>
+							<tr><td>apomorphism</td><td>“erottaminen”</td><td><code><small>type RCoalgebra f a = a -> f (Either (Fix f) a)</small></code></td></tr>
+							<tr><td>histomorphism</td><td>“historia”</td><td><code><small>type CVAlgebra f a = f (Cofree f a) -> a</small></code></td></tr>
+							<tr><td>futumorphism</td><td>“tulevaisuus”</td><td><code><small>type CVCoalgebra f a = a -> f (Free f a)</small></code></td></tr>
+							<tr><td>prepromorphism</td><td colspan="2">“esikäsittely”</td></tr>
+							<tr><td>postpromorphism</td><td colspan="2">“jälkikäsittely”</td></tr>
+							<tr><td>hylomorphism</td><td colspan="2">“hajauttaminen + romauttaminen”</td></tr>
+							<tr><td>chronomorphism</td><td colspan="2">“tulevaisuus + historia”</td></tr>
+						</table>
+						<p>zygomorphism, dynamorphism, codynamorphism, elgot algebra, elgot coalgebra, metamorphism, synchromorphism, exomorphism, mutumorphism, ...</p>
+					</small>
+				</section>
+
+				<section>
+					<h4>Summary</h4>
+					<img style="height: 12em" src="recursion-schemes.png" />
+					<p style="text-align: right"><cite><small><a href="https://github.com/sellout/recursion-scheme-talk/blob/master/cheat%20sheet.pdf">https://github.com/sellout/recursion-scheme-talk/blob/master/cheat%20sheet.pdf</a></small></cite>
+				</section>
+
+				<section>
+					<h4>Reading material for passionate souls</h4>
+<div style="text-align: left"><small><small><dl>
+<dt>Cheat sheet</dt>
+<dd><a href="https://github.com/sellout/recursion-scheme-talk/blob/master/cheat%20sheet.pdf">https://github.com/sellout/recursion-scheme-talk/blob/master/cheat%20sheet.pdf</a></dd>
+
+<dt>First mention of catamorphism</dt>
+<dd><a href="https://www.researchgate.net/publication/238688759_First_steps_towards_the_theory_of_rose_trees">https://www.researchgate.net/publication/238688759_First_steps_towards_the_theory_of_rose_trees</a></dd>
+
+<dt>Data structures and program transformation</dt>
+<dd><a href="https://www.sciencedirect.com/science/article/pii/0167642390900237">https://www.sciencedirect.com/science/article/pii/0167642390900237</a></dd>
+
+<dt>Algebraic Data Types and Program Transformation</dt>
+<dd><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.221.4281&rep=rep1&type=pdf">http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.221.4281&rep=rep1&type=pdf</a></dd>
+
+<dt>Functional Programming with Bananas, Lenses, Envelopes and Barbed Wire</dt>
+<dd><a href="http://maartenfokkinga.github.io/utwente/mmf91m.pdf">http://maartenfokkinga.github.io/utwente/mmf91m.pdf</a></dd>
+
+<dt>Primitive (Co)Recursion and Course-of-Value (Co)Iteration, Categorically (Uustalu, Vene)</dt>
+<dd><a href="http://cs.ioc.ee/~tarmo/papers/inf99.pdf">http://cs.ioc.ee/~tarmo/papers/inf99.pdf</a></dd>
+
+<dt>Great blog series, which I can understand</dt>
+<dd><a href="https://blog.sumtypeofway.com/an-introduction-to-recursion-schemes/">https://blog.sumtypeofway.com/an-introduction-to-recursion-schemes/</a></dd>
+
+<dt>More readable blog posts</dt>
+<dd><a href="https://jtobin.io/practical-recursion-schemes">https://jtobin.io/practical-recursion-schemes</a><br/>
+	<a href="https://jtobin.io/promorphisms-pre-post">https://jtobin.io/promorphisms-pre-post</a><br/>
+	<a href="http://comonad.com/reader/2008/time-for-chronomorphisms/">http://comonad.com/reader/2008/time-for-chronomorphisms/</a></dd>
+
+<dt>Table of recursion schemes</dt>
+<dd><a href="http://comonad.com/reader/2009/recursion-schemes/">http://comonad.com/reader/2009/recursion-schemes/</a></dd>
+
+<dt>Elgot algebras</dt>
+<dd><a href="https://arxiv.org/pdf/cs/0609040.pdf">https://arxiv.org/pdf/cs/0609040.pdf</a></dd>
+
+<dt>Edward Kmett’s Haskell library</dt>
+<dd><a href="http://hackage.haskell.org/package/recursion-schemes">http://hackage.haskell.org/package/recursion-schemes</a></dd>
+
+<dt>About data vs codata</dt>
+<dd><a href="https://www.tac-tics.net/blog/data-vs-codata">https://www.tac-tics.net/blog/data-vs-codata</a><br/>
+	<a href="http://blog.sigfpe.com/2007/07/data-and-codata.html">http://blog.sigfpe.com/2007/07/data-and-codata.html</a></dd>
+
+<dt>A curation of useful resources for learning about and using recursion schemes</dt>
+<dd><a href="https://github.com/passy/awesome-recursion-schemes">https://github.com/passy/awesome-recursion-schemes</a></dd>
+
+<dt>About catamorphisms</dt>
+<dd><a href="https://www.schoolofhaskell.com/user/edwardk/recursion-schemes/catamorphisms">https://www.schoolofhaskell.com/user/edwardk/recursion-schemes/catamorphisms</a></dd>
+</dl></small></small></div>
+				</section>
+
+				<section>
+					<p>Remember to learn<br />a category theoretical thing<br />every year ;)</p>
+					<br />
+					<p>Thank you!</p>
+				</section>
+			</div>
+
+			<div class="footer">
+				link to this presentation: <a href="https://lahteenmaki.net/dev_*18/">https://lahteenmaki.net/dev_*18/</a>
+			</div>	
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
