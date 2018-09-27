@@ -122,7 +122,7 @@ factorial n = n * factorial (n-1)
 factorial n = foldr (*) 1 [1..n]
 					</code></pre>
 					<p>No recursion to be seen! But what is this “fold” thing?</p>
-					<ul>
+					<ul class="fragment">
 						<li>Fold hides the recursion in a safe wrapping</li>
 						<li>Fold is actually something called a <i>catamorphism</i></li>
 						<li>There are other wrappers. Ever heard of an <i>unfold</i>?</li>
