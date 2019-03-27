@@ -313,7 +313,7 @@ type RAlgebra f a = f (Fix f, a) -> a
 factorial :: Natural -> Natural
 factorial = para $ \case
     Nothing     -> 1
-    Just (n, r) -> (n+1) * rx
+    Just (n, r) -> (n+1) * r
 					</code></pre>
 					<p class="fragment">Thus, catamorphism with access to the current input value is called a <i>paramorphism</i>!</p>
 				</section>
