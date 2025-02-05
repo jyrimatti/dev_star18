@@ -154,7 +154,7 @@ factorial n = foldr (*) 1 [1..n]
 						<li class="fragment">1987: Name <i>catamorphism</i> appears in a <a href="https://www.researchgate.net/publication/238688759_First_steps_towards_the_theory_of_rose_trees">paper</a> by <i>Lambert Meertens</i></li>
 						<li class="fragment">1990: The category theoretic machinery behind these was <a href="https://www.sciencedirect.com/science/article/pii/0167642390900237">resolved</a> by <i>Grant Malcolm</i></li>
 						<li class="fragment">1991: <i>Meijer</i>, <i>Fokkinga</i> and <i>Paterson</i> publish their famous paper<br /> <a href="http://maartenfokkinga.github.io/utwente/mmf91m.pdf">Functional Programming with Bananas, Lenses, Envelopes and Barbed Wire</a></li>
-						<li class="fragment">1999: Histomorphism and Futumorphism are <a href="http://cs.ioc.ee/~tarmo/papers/inf99.pdf">introduced</a> by Uustalu & Venu</li>
+						<li class="fragment">1999: Histomorphism and Futumorphism are <a href="https://informatica.vu.lt/journal/INFORMATICA/article/256/file/pdf">introduced</a> by Uustalu & Venu</li>
 						<li class="fragment">2011: <i>Edward Kmett</i> releases the first version of <a href="http://hackage.haskell.org/package/recursion-schemes">recursion-schemes library</a></li>
 						<li class="fragment">2012: Hinze et al. publish a <a href="http://www.cs.ox.ac.uk/people/daniel.james/sorting/sorting.pdf">paper</a> and <a href="http://www.cs.ox.ac.uk/ralf.hinze/publications/Sorting.pdf">another</a> describing sorting algorithms in recursion schemes </li>
 						<li class="fragment">2014: First part of the excellent <a href="https://blog.sumtypeofway.com/an-introduction-to-recursion-schemes/">blog series</a> is published</li>
@@ -325,7 +325,7 @@ factorial = para $ \case
 					<pre><code class="haskell">
 (|||) :: a b d -> a c d -> a (Either b c) d 
 					</code></pre>
-					<p>“split a valut to one of two different paths”</p>
+					<p>“split a value to one of two different paths”</p>
 				</section>
 
 				<section>
@@ -594,9 +594,12 @@ coelgot :: Functor f => ((a, f b) -> b) -> Coalgebra f a -> a -> b
 <dd><a href="http://maartenfokkinga.github.io/utwente/mmf91m.pdf">http://maartenfokkinga.github.io/utwente/mmf91m.pdf</a></dd>
 
 <dt>Primitive (Co)Recursion and Course-of-Value (Co)Iteration, Categorically (Uustalu, Vene)</dt>
-<dd><a href="http://cs.ioc.ee/~tarmo/papers/inf99.pdf">http://cs.ioc.ee/~tarmo/papers/inf99.pdf</a></dd>
+<dd><a href="https://informatica.vu.lt/journal/INFORMATICA/article/256/file/pdf">https://informatica.vu.lt/journal/INFORMATICA/article/256/file/pdf</a></dd>
 
-<dt>Great blog series, which I can understand</dt>
+<dt>Hinze et al. describing sorting algorithms in recursion schemes</dt>
+<dd><a href="http://www.cs.ox.ac.uk/people/daniel.james/sorting/sorting.pdf">paper</a> and <a href="http://www.cs.ox.ac.uk/ralf.hinze/publications/Sorting.pdf">another</a></dd>
+
+<dt>Great blog series, which I can understand (7 parts)</dt>
 <dd><a href="https://blog.sumtypeofway.com/an-introduction-to-recursion-schemes/">https://blog.sumtypeofway.com/an-introduction-to-recursion-schemes/</a></dd>
 
 <dt>More readable blog posts</dt>
@@ -614,7 +617,7 @@ coelgot :: Functor f => ((a, f b) -> b) -> Coalgebra f a -> a -> b
 <dd><a href="http://hackage.haskell.org/package/recursion-schemes">http://hackage.haskell.org/package/recursion-schemes</a></dd>
 
 <dt>About data vs codata</dt>
-<dd><a href="https://www.tac-tics.net/blog/data-vs-codata">https://www.tac-tics.net/blog/data-vs-codata</a><br/>
+<dd><a href="https://web.archive.org/web/20180313143023/https://tac-tics.net/blog/data-vs-codata/">https://www.tac-tics.net/blog/data-vs-codata</a><br/>
 	<a href="http://blog.sigfpe.com/2007/07/data-and-codata.html">http://blog.sigfpe.com/2007/07/data-and-codata.html</a></dd>
 
 <dt>A curation of useful resources for learning about and using recursion schemes</dt>
@@ -622,6 +625,12 @@ coelgot :: Functor f => ((a, f b) -> b) -> Coalgebra f a -> a -> b
 
 <dt>About catamorphisms</dt>
 <dd><a href="https://www.schoolofhaskell.com/user/edwardk/recursion-schemes/catamorphisms">https://www.schoolofhaskell.com/user/edwardk/recursion-schemes/catamorphisms</a></dd>
+
+<dt>edit 2025: Recursion Schemes from Comonads (Uustalu et al)</dt>
+<dd><a href="https://www.researchgate.net/publication/220673192_Recursion_Schemes_from_Comonads">https://www.researchgate.net/publication/220673192_Recursion_Schemes_from_Comonads</a></dd>
+
+<dt>edit 2025: An approachable intro to different recursion schemes</dt>
+<dd><a href="https://yangzhixuan.github.io/pdf/fantastic-morphisms.pdf">Fantastic Morphisms and Where to Find Them - A Guide to Recursion Schemes</a></dd>
 </dl></small></small></div>
 				</section>
 
